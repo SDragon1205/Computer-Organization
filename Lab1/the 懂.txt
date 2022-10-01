@@ -1,0 +1,69 @@
+# This example shows an implementation of the mathematical
+# factorial function (! function).
+
+.data
+argument: .word 7 # Number to find the factorial value of
+str1: .string "Factorial value of "
+str2: .string " is "
+
+.text
+main:
+        lw       a0, argument   # Load argument from static data
+        jal      ra, fact       # Jump-and-link to the 'fact' label
+
+        # Print the result to console
+        mv       a1, a0
+        lw       a0, argument
+        jal      ra, printResult
+
+        # Exit program
+        li       a0, 10
+        ecall
+
+fact:
+        addi     sp, sp, -16     #sp stack open new 16bits
+        sw       ra, 8(sp)       #store ra in sp8
+        sw       a0, 0(sp)       #store a0 in sp0
+        addi     t0, a0, -1      #t0 = a0-1
+        bge      t0, zero, nfact #if(t0 >= zero){jump to nfact}
+
+        addi     a0, zero, 1     #a0 = 1
+        addi     sp, sp, 16      #sp stack close
+        jalr     x0, x1, 0       #return
+
+nfact:
+        addi     a0, a0, -1      #a0 = a0 -1
+        jal      ra, fact        #ra = now address(next return will back here) and jump to fact
+        addi     t1, a0, 0       #t1 = a0 + 0
+        lw       a0, 0(sp)       #load a0 from sp0
+        lw       ra, 8(sp)       #load ra from sp8
+        addi     sp, sp, 16      #sp stack close 16bits
+
+        mul      a0, a0, t1      #a0 = a0 * t1
+        ret                      #return
+
+
+# expects:
+# a0: Value which factorial number was computed from
+# a1: Factorial result
+printResult:
+        mv       t0, a0
+        mv       t1, a1
+
+        la       a1, str1
+        li       a0, 4
+        ecall
+
+        mv       a1, t0
+        li       a0, 1
+        ecall
+
+        la       a1, str2
+        li       a0, 4
+        ecall
+
+        mv       a1, t1
+        li       a0, 1
+        ecall
+
+        ret
